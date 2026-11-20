@@ -4,6 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#101827">
+<meta name="description" content="Nexo crypto futures position sizing and risk calculator.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
 <title>Nexo Futures Risk Calculator</title>
 <style>
 :root{--bg:#0b1220;--panel:#121d30;--panel2:#18263c;--text:#edf3ff;--muted:#9fb0c9;--line:#2a3a54;--green:#27c58b;--red:#ff6b75;--gold:#f5c46b;--blue:#7fb5ff}
@@ -159,6 +163,11 @@ main{max-width:1040px;margin:auto;padding:22px 16px 48px}.top{display:flex;justi
  });
  calculate();
 })();
+</script>
+<script>
+if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+  window.addEventListener("load", () => navigator.serviceWorker.register("./service-worker.js").catch(() => {}));
+}
 </script>
 </body>
 </html>
