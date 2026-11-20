@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#101827">
+<title>Nexo Futures Risk Calculator</title>
+<style>
+:root{--bg:#0b1220;--panel:#121d30;--panel2:#18263c;--text:#edf3ff;--muted:#9fb0c9;--line:#2a3a54;--green:#27c58b;--red:#ff6b75;--gold:#f5c46b;--blue:#7fb5ff}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(145deg,#0b1220,#101b2d);color:var(--text);font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+main{max-width:1040px;margin:auto;padding:22px 16px 48px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}.brand{font-size:24px;font-weight:800;letter-spacing:-.5px}.sub{color:var(--muted);font-size:13px}.pill{border:1px solid #276c59;color:#76e2b7;background:#102c2a;padding:5px 10px;border-radius:99px;font-size:12px;font-weight:700}
+.layout{display:grid;grid-template-columns:1.05fr .95fr;gap:16px}.panel{background:rgba(18,29,48,.96);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 12px 35px #0002}.panel h2{font-size:17px;margin:0 0 14px}.section{margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.field label{display:block;color:var(--muted);font-size:12px;margin:0 0 5px}.field input,.field select{width:100%;border:1px solid #344762;background:#0d1728;color:var(--text);border-radius:10px;padding:11px 12px;font-size:15px;min-width:0;outline:none}.field input:focus,.field select:focus{border-color:var(--blue)}.toggle{display:flex;background:#0d1728;border:1px solid var(--line);padding:4px;border-radius:11px;gap:4px}.toggle button{flex:1;border:0;border-radius:8px;padding:10px;color:var(--muted);background:transparent;font-weight:800;cursor:pointer}.toggle button.active{background:#254568;color:#fff}.hint{font-size:12px;color:var(--muted);margin-top:7px}.metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.metric{background:var(--panel2);border:1px solid var(--line);border-radius:13px;padding:13px}.metric small{display:block;color:var(--muted);font-size:12px}.metric strong{display:block;font-size:23px;margin-top:3px;letter-spacing:-.4px;overflow-wrap:anywhere}.green{color:var(--green)}.red{color:var(--red)}.gold{color:var(--gold)}table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}th,td{text-align:right;padding:9px 5px;border-bottom:1px solid var(--line)}th:first-child,td:first-child{text-align:left}th{color:var(--muted);font-weight:600}.notice{border-radius:12px;padding:12px;margin-top:12px;font-size:13px;background:#132a27;border:1px solid #24594c}.notice.warn{background:#30271a;border-color:#66502b}.notice.bad{background:#321d27;border-color:#713443}.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}.btn{border:1px solid var(--line);background:#20334e;color:var(--text);padding:10px 13px;border-radius:10px;font-weight:700;cursor:pointer}.btn.primary{background:#17664e;border-color:#238765}.btn:hover{filter:brightness(1.12)}.fine{font-size:12px;color:var(--muted);margin-top:12px}.full{grid-column:1/-1}.checkrow{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:13px;margin-top:9px}.checkrow input{accent-color:var(--green)}.error{color:var(--red);font-size:13px;margin-top:10px;min-height:18px}
+@media(max-width:760px){.layout{grid-template-columns:1fr}.top{align-items:flex-start}.brand{font-size:21px}.panel{padding:15px}main{padding:15px 12px 34px}.metric strong{font-size:21px}}
+</style>
+</head>
+<body>
+<main>
+  <header class="top"><div><div class="brand">NEXO <span style="color:#7fb5ff">RISK</span></div><div class="sub">Binance USDⓈ-M Futures • Trade planning calculator</div></div><span class="pill">VERSION 2.0</span></header>
+  <div class="layout">
+    <section class="panel">
+      <h2>1 · Signal & account details</h2>
+      <div class="toggle" role="group" aria-label="Position direction"><button id="longBtn" type="button">LONG</button><button id="shortBtn" class="active" type="button">SHORT</button></div>
+      <div class="grid" style="margin-top:13px">
+        <div class="field"><label for="symbol">Coin / pair (optional)</label><input id="symbol" value="COINUSDT" autocomplete="off"></div>
+        <div class="field"><label for="capital">Available trading capital (USDT)</label><input id="capital" type="number" min="0" step="any" value="10"></div>
+        <div class="field"><label for="entry">Entry price</label><input id="entry" type="number" min="0" step="any" value="6.551"></div>
+        <div class="field"><label for="stop">Stop-loss price</label><input id="stop" type="number" min="0" step="any" value="6.82"></div>
+        <div class="field"><label for="risk">Maximum planned loss (USDT)</label><input id="risk" type="number" min="0" step="any" value="3"></div>
+        <div class="field"><label for="leverage">Leverage to compare</label><select id="leverage"><option>3</option><option>5</option><option selected>8</option><option>10</option><option>15</option><option>20</option><option>25</option><option>50</option><option>75</option><option>100</option><option>125</option></select></div>
+      </div>
+      <div class="hint">The calculator derives position size from your risk and stop distance. The leverage selector changes the margin required; it does not change the planned loss if position size stays the same.</div>
+      <div class="section">
+        <h2>2 · Take-profit targets</h2>
+        <div class="grid">
+          <div class="field"><label for="tp1">TP1</label><input id="tp1" type="number" step="any" value="6.28"></div>
+          <div class="field"><label for="tp2">TP2</label><input id="tp2" type="number" step="any" value="6.00"></div>
+          <div class="field"><label for="tp3">TP3</label><input id="tp3" type="number" step="any" value="5.74"></div>
+          <div class="field"><label for="tp4">TP4</label><input id="tp4" type="number" step="any" value="5.47"></div>
+          <div class="field"><label for="tp5">TP5</label><input id="tp5" type="number" step="any" value="5.20"></div>
+        </div>
+      </div>
+      <div class="section">
+        <h2>3 · Costs & partial exits (optional estimates)</h2>
+        <div class="grid">
+          <div class="field"><label for="fee">Fee rate per side (%)</label><input id="fee" type="number" min="0" step="any" value="0.05"></div>
+          <div class="field"><label for="slippage">Extra SL slippage allowance (%)</label><input id="slippage" type="number" min="0" step="any" value="0"></div>
+          <div class="field"><label for="closePct">Position closed at each TP (%)</label><input id="closePct" type="number" min="1" max="100" step="1" value="20"></div>
+          <div class="field"><label for="mode">Margin mode</label><select id="mode"><option value="Isolated" selected>Isolated (recommended for planned risk)</option><option value="Cross">Cross</option></select></div>
+        </div>
+        <label class="checkrow"><input id="includeFees" type="checkbox" checked> Include estimated entry + exit trading fees in net P/L</label>
+        <div class="hint">Fee rate is an editable assumption. Check your actual Binance VIP tier and maker/taker order type. Funding fees are not included.</div>
+      </div>
+      <div class="actions"><button class="btn primary" id="copyBtn">Copy trade plan</button><button class="btn" id="resetBtn">Reset example</button></div>
+      <div id="error" class="error" role="alert"></div>
+    </section>
+    <section class="panel">
+      <h2>4 · Position sizing results</h2>
+      <div class="metrics">
+        <div class="metric"><small>Position notional</small><strong id="notional">—</strong></div>
+        <div class="metric"><small>Coin quantity</small><strong id="qty">—</strong></div>
+        <div class="metric"><small>Required leverage (using all capital)</small><strong id="requiredLev">—</strong></div>
+        <div class="metric"><small>Margin at selected leverage</small><strong id="margin">—</strong></div>
+        <div class="metric"><small>Estimated loss at SL*</small><strong class="red" id="slLoss">—</strong></div>
+        <div class="metric"><small>Risk as % of capital</small><strong id="riskPct">—</strong></div>
+      </div>
+      <div id="marginNotice" class="notice">Enter valid trade details to calculate.</div>
+      <div class="section">
+        <h2>5 · Take-profit outcome</h2>
+        <table><thead><tr><th>Target</th><th>Price</th><th>Gross P/L</th><th>Est. net P/L</th><th>R multiple</th></tr></thead><tbody id="tpRows"></tbody></table>
+        <div class="hint">Each row assumes the full position closes at that one target. For staged exits, use the partial-exit note below.</div>
+      </div>
+      <div class="section">
+        <h2>6 · Partial take-profit example</h2>
+        <div class="metrics">
+          <div class="metric"><small>At each target</small><strong id="partialPct">—</strong></div>
+          <div class="metric"><small>Across 5 targets</small><strong id="partialTotal">—</strong></div>
+        </div>
+        <div class="hint" id="partialNote">Set the percentage of the original position to close at each TP. If the total exceeds 100%, the plan is not possible.</div>
+      </div>
+      <div class="section">
+        <h2>7 · Risk checks</h2>
+        <div id="checks" class="notice">Checks will appear here.</div>
+        <div class="fine">*SL loss is an estimate including the optional slippage allowance and, if enabled, estimated entry/exit fees. Actual execution may differ.</div>
+      </div>
+    </section>
+  </div>
+  <p class="fine">Educational planning tool only. It does not connect to Binance, place orders, fetch live prices, or calculate an exchange-confirmed liquidation price. Confirm contract specifications, quantity precision, minimum notional, leverage brackets and liquidation rules in Binance before trading.</p>
+</main>
+<script>
+(() => {
+ let side='Short';
+ const $=id=>document.getElementById(id);
+ const ids=['symbol','capital','entry','stop','risk','leverage','tp1','tp2','tp3','tp4','tp5','fee','slippage','closePct','mode','includeFees'];
+ const n=id=>Number($(id).value);
+ const fmt=(v,d=2)=>Number.isFinite(v)?v.toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d}):'—';
+ const money=v=>(v<0?'−':'')+'$'+fmt(Math.abs(v),2);
+ function setSide(s){side=s;$('longBtn').classList.toggle('active',s==='Long');$('shortBtn').classList.toggle('active',s==='Short');calculate()}
+ $('longBtn').addEventListener('click',()=>setSide('Long'));
+ $('shortBtn').addEventListener('click',()=>setSide('Short'));
+ ids.forEach(id=>$(id).addEventListener('input',calculate));
+ function calculate(){
+  const cap=n('capital'),risk=n('risk'),entry=n('entry'),stop=n('stop'),lev=n('leverage'),fee=n('fee')/100,slip=n('slippage')/100,closePct=n('closePct');
+  const valid=cap>0&&risk>0&&risk<=cap&&entry>0&&stop>0&&((side==='Short'&&stop>entry)||(side==='Long'&&stop<entry))&&lev>0&&fee>=0&&slip>=0&&closePct>=1&&closePct<=100;
+  $('error').textContent=valid?'':'Check your inputs: capital/risk must be positive (risk ≤ capital), and SL must be above entry for SHORT or below entry for LONG.';
+  if(!valid){['notional','qty','requiredLev','margin','slLoss','riskPct','partialPct','partialTotal'].forEach(id=>$(id).textContent='—');$('tpRows').innerHTML='';$('marginNotice').className='notice bad';$('marginNotice').textContent='Invalid inputs. Correct the highlighted values.';$('checks').textContent='Unable to assess until inputs are valid.';return}
+  const dist=Math.abs(stop-entry)/entry;
+  // Solve quantity so adverse stop movement plus estimated round-trip fees equals the risk budget.
+  const stopMove=dist+slip;
+  const riskPerDollar=stopMove+( $('includeFees').checked ? fee*(1+stop/entry) : 0 );
+  const notional=risk/riskPerDollar;
+  const qty=notional/entry;
+  const requiredLev=notional/cap;
+  const margin=notional/lev;
+  const rawStop=notional*stopMove;
+  const stopFees=$('includeFees').checked?notional*fee+qty*stop*fee:0;
+  const stopLoss=rawStop+stopFees;
+  const riskPct=risk/cap*100;
+  $('notional').textContent=money(notional);$('qty').textContent=fmt(qty,6);
+  $('requiredLev').textContent=fmt(requiredLev,2)+'x';$('margin').textContent=money(margin);
+  $('slLoss').textContent='−'+money(stopLoss);$('riskPct').textContent=fmt(riskPct,1)+'%';
+  const notice=$('marginNotice');
+  if(margin>cap){notice.className='notice warn';notice.textContent=`At ${lev}x, estimated initial margin is ${money(margin)}, above your ${money(cap)} capital. Increase leverage only if appropriate for the contract, or reduce risk/position size.`}
+  else {notice.className='notice';notice.textContent=`At ${lev}x, estimated initial margin is ${money(margin)}. Remaining capital before fees/funding: ${money(cap-margin)}. Isolated margin is selected: the margin assigned to the position is the amount at risk subject to exchange rules; cross margin can expose more account balance.`}
+  let grossSum=0,netSum=0,rows='';
+  const targets=[1,2,3,4,5].map(i=>n('tp'+i));
+  targets.forEach((p,i)=>{
+   if(!(p>0)){rows+=`<tr><td>TP${i+1}</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>`;return}
+   const favourable=side==='Short'?(entry-p)/entry:(p-entry)/entry;
+   const gross=notional*favourable;
+   const exitFee=$('includeFees').checked?qty*p*fee:0;
+   const entryFee=$('includeFees').checked?notional*fee:0;
+   const net=gross-exitFee-entryFee;
+   grossSum+=gross*closePct/100;netSum+=net*closePct/100;
+   rows+=`<tr><td>TP${i+1}</td><td>${fmt(p,6)}</td><td class="${gross>=0?'green':'red'}">${money(gross)}</td><td class="${net>=0?'green':'red'}">${money(net)}</td><td>${fmt(net/risk,2)}R</td></tr>`;
+  });
+  $('tpRows').innerHTML=rows;
+  $('partialPct').textContent=fmt(closePct,0)+'%';
+  $('partialTotal').textContent=fmt(closePct*5,0)+'%';
+  $('partialNote').textContent=closePct*5>100?'This staged exit plan exceeds 100% of the original position. Reduce the percentage per target.':`Closing ${fmt(closePct,0)}% at each of five targets uses ${fmt(closePct*5,0)}% of the original position. Estimated combined net profit if all targets fill: ${money(netSum)}.`;
+  const issues=[];
+  if(requiredLev>125)issues.push('Required leverage exceeds 125x; the trade does not fit this simple capital/risk setup.');
+  if(requiredLev>lev)issues.push(`Your selected ${lev}x does not provide enough margin capacity for this position (needed about ${fmt(requiredLev,2)}x against all stated capital).`);
+  if(riskPct>5)issues.push(`You are risking ${fmt(riskPct,1)}% of capital on one trade. Consider whether this is too much concentration.`);
+  if(side==='Short'&&targets.some(p=>p>0&&p>=entry)||side==='Long'&&targets.some(p=>p>0&&p<=entry))issues.push('One or more take-profit prices are not on the profitable side of entry for this direction.');
+  if($('mode').value==='Cross')issues.push('Cross margin can put more of your futures wallet at risk; this calculator cannot model cross-margin liquidation.');
+  if(!issues.length)issues.push('Basic arithmetic checks passed. This is not confirmation that the trade is safe or that Binance will accept the order.');
+  $('checks').className='notice '+(issues.some(x=>x.includes('exceeds')||x.includes('does not')||x.includes('too much')||x.includes('not on'))?'warn':'');
+  $('checks').innerHTML=issues.map(x=>'• '+x).join('<br>');
+  window.currentPlan={side,symbol:$('symbol').value,entry,stop,cap,risk,lev,notional,qty,margin,stopLoss,targets,fee:n('fee'),mode:$('mode').value};
+ }
+ $('copyBtn').addEventListener('click',async()=>{
+  const p=window.currentPlan;if(!p){return}
+  const t=`NEXO BINANCE FUTURES PLAN\n${p.symbol} | ${p.side}\nEntry: ${p.entry}\nStop-loss: ${p.stop}\nCapital: ${p.cap} USDT | Risk budget: ${p.risk} USDT\nPosition notional: ${fmt(p.notional,2)} USDT\nQuantity: ${fmt(p.qty,6)}\nSelected leverage: ${p.lev}x | Estimated margin: ${fmt(p.margin,2)} USDT\nEstimated SL loss: ${fmt(p.stopLoss,2)} USDT\nMargin mode: ${p.mode}\nTPs: ${p.targets.join(', ')}\nFee assumption: ${p.fee}% per side\nCheck Binance contract rules and order preview before execution.`;
+  try{await navigator.clipboard.writeText(t);$('copyBtn').textContent='Copied!'}catch(e){$('copyBtn').textContent='Copy unavailable'}setTimeout(()=>$('copyBtn').textContent='Copy trade plan',1800);
+ });
+ $('resetBtn').addEventListener('click',()=>{
+  const vals={symbol:'COINUSDT',capital:10,entry:6.551,stop:6.82,risk:3,leverage:8,tp1:6.28,tp2:6,tp3:5.74,tp4:5.47,tp5:5.2,fee:.05,slippage:0,closePct:100,mode:'Isolated'};
+  Object.entries(vals).forEach(([k,v])=>$(k).value=v);$('includeFees').checked=true;setSide('Short');
+ });
+ calculate();
+})();
+</script>
+</body>
+</html>
